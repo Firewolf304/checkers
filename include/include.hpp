@@ -7,6 +7,9 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/component/mouse.hpp>
+#include <ftxui/component/event.hpp>
+#include "ftxui/component/loop.hpp"
 
 // logs
 #if ENABLE_BOOST_LOG

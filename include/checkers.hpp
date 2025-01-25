@@ -8,12 +8,15 @@
 #include "local.hpp"
 
 namespace checkers {
+    using namespace std::chrono_literals;
+
     class checkers {
         ftxui::ScreenInteractive& screen_;
         board::board board;
         std::shared_ptr<ftxui::ComponentBase> render;
         int player = 1;
-        std::chrono::time_point<std::chrono::system_clock, std::chrono::duration> start;
+        std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<double>> start;
+        std::shared_ptr<ftxui::Loop> loop;
     public:
         checkers(ftxui::ScreenInteractive & tui) : screen_( tui) , board(tui, 10, 10) {
 #ifdef ENABLE_BOOST_LOG
@@ -25,13 +28,12 @@ namespace checkers {
             BOOST_LOG_TRIVIAL(info) << "Logs enabled";
             BOOST_LOG_TRIVIAL(info) << "Creating board";
 #endif
-            auto start = std::chrono::high_resolution_clock::now();
-
+            this->start = std::chrono::high_resolution_clock::now();
             this->render = ftxui::Renderer([&] {
 
                 //this->player = !(this->player);
                 auto now = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> elapsed = now - start;
+                std::chrono::duration<double> elapsed = now - this->start;
                 return ftxui::window(ftxui::text("Checkers:") | ftxui::bold,ftxui::hbox({
                     // board place
                     ftxui::vbox({
@@ -47,6 +49,9 @@ namespace checkers {
                             ftxui::text(std::format("Time: {} seconds", elapsed.count())),
                         })
                     })
+                    /*ftxui::vbox({
+                        this->makeMenu()
+                    })*/
                 }));
             });
             render |= ftxui::CatchEvent([&](ftxui::Event event) {
@@ -61,30 +66,45 @@ namespace checkers {
                     player = !player;
                     return true;
                 }
-                return true;
+                return false;
             });
 
-            while(true) {
-                this->screen_.Loop(this->render);
-            }
 
         }
-
+        void Run() {
+#ifdef ENABLE_BOOST_LOG
+            BOOST_LOG_TRIVIAL(info) << "Starting (za)loopper";
+#endif
+            this->loop = std::make_shared<ftxui::Loop>(&this->screen_, this->render);
+            while (!loop->HasQuitted()) {
+                loop->RunOnce();
+                //std::this_thread::sleep_for(std::chrono::milliseconds(10s));
+                this->screen_.PostEvent(ftxui::Event::Custom);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10ms));
+            }
+        }
         auto makeMenu() {
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            return ftxui::hbox({
+            /*return ftxui::hbox({
                 ftxui::vbox({
-                ftxui::filler(),
-                this->board.getBoard(),
-                ftxui::filler()
+                    ftxui::filler(),
+                    this->board.getBoard(),
+                    ftxui::filler()
                 }),
                 ftxui::vbox({
+                    ftxui::text(std::format("Player: {}", player)) | ftxui::bold,
+                    ftxui::separator(),
+                    ftxui::vbox({
+                        ftxui::text(std::format("Time: {} seconds", elapsed.count())),
+                    })
+                })
+            });*/
+            return ftxui::vbox({
                 ftxui::text(std::format("Player: {}", player)) | ftxui::bold,
                 ftxui::separator(),
                 ftxui::vbox({
-                ftxui::text(std::format("Time: {} seconds", elapsed.count())),
-                })
+                    ftxui::text(std::format("Time: {} seconds", elapsed.count())),
                 })
             });
         }
