@@ -30,9 +30,6 @@ namespace checkers {
             BOOST_LOG_TRIVIAL(info) << "Creating board";
 #endif
             this->start = std::chrono::high_resolution_clock::now();
-            auto exit_button = ftxui::Button("Выход", [] {
-                std::exit(0); // Завершение программы
-            });
             this->render = ftxui::Renderer([&] {
 
                 //this->player = !(this->player);
@@ -57,9 +54,9 @@ namespace checkers {
 
                                 // menu
                                 this->makeMenu() | ftxui::border | ftxui::size(ftxui::WIDTH,ftxui::EQUAL,20),
-                                Renderer(ftxui::Button("", [](){}))
-                            }) | ftxui::flex,
-                    }) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 20)
+                                ftxui::filler(),
+                                ftxui::vbox(ftxui::Button("Exit", [](){std::exit(0);}))
+                            }) | ftxui::flex }) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 20)
                         ) | size(ftxui::WIDTH, ftxui::GREATER_THAN, 49) | size(ftxui::HEIGHT, ftxui::GREATER_THAN, 12);
                 }
             });
