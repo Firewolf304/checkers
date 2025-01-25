@@ -3,7 +3,7 @@
 int main() {
     auto screen = ftxui::ScreenInteractive::Fullscreen();
 
-    checkers::checkers game(screen);
+    checkers::checkers<ftxui::ScreenInteractive> game(screen);
     game.Run();
     return 0;
 }
