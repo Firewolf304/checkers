@@ -13,3 +13,6 @@ CMakeUserPresets.json
 cmake-build-debug
 .idea/*
 .run/*
+.idea
+.run
+
